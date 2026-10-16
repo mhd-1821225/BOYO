@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#14522c" />
+  <meta name="description" content="BOYO — the hidden-card game where the lowest score wins. Play with bots or up to 8 friends online." />
+  <title>BOYO</title>
+  <link rel="icon" href="./icons/icon-32.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+  
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Opening intro -->
+    <section id="intro" class="screen felt" aria-label="BOYO intro">
+      <div class="intro-stage">
+        <div class="intro-deck card back lg"></div>
+        <div class="intro-row">
+          <div class="intro-card" style="--i:0"><div class="flipper"><div class="card back lg"></div><div class="card face lg red letter"><span class="corner">B<br>♥</span><b>B</b><span class="corner br">B<br>♥</span></div></div></div>
+          <div class="intro-card" style="--i:1"><div class="flipper"><div class="card back lg"></div><div class="card face lg black letter"><span class="corner">O<br>♠</span><b>O</b><span class="corner br">O<br>♠</span></div></div></div>
+          <div class="intro-card" style="--i:2"><div class="flipper"><div class="card back lg"></div><div class="card face lg red letter"><span class="corner">Y<br>♦</span><b>Y</b><span class="corner br">Y<br>♦</span></div></div></div>
+          <div class="intro-card" style="--i:3"><div class="flipper"><div class="card back lg"></div><div class="card face lg black letter"><span class="corner">O<br>♣</span><b>O</b><span class="corner br">O<br>♣</span></div></div></div>
+        </div>
+        <img class="intro-logo" src="./assets/boyo-logo.png" alt="BOYO" />
+        <p class="intro-tag">Lowest score wins.</p>
+      </div>
+      <button class="skip" id="skipIntro">Tap to skip</button>
+    </section>
+
+    <!-- Main menu -->
+    <section id="menu" class="screen felt hidden">
+      <div class="menu-wrap">
+        <img class="menu-logo" src="./assets/boyo-logo.png" alt="BOYO" />
+        <p class="menu-sub">The hidden-card game for 2–8 players</p>
+        <label class="name-field">
+          <span>Your name</span>
+          <input id="nameInput" maxlength="16" autocomplete="nickname" placeholder="Player" />
+        </label>
+        <div class="menu-buttons">
+          <button class="btn primary big" id="btnSolo">Play vs Bots</button>
+          <button class="btn blue big" id="btnCreate">Create Online Room</button>
+          <button class="btn cream big" id="btnJoin">Join with Code</button>
+          <button class="btn link" id="btnRules">How to Play</button>
+        </div>
+      </div>
+      <button class="icon-btn sound-toggle" data-sound aria-label="Toggle sound">♪</button>
+    </section>
+
+    <!-- Lobby -->
+    <section id="lobby" class="screen felt hidden">
+      <div class="panel lobby-panel">
+        <div class="lobby-head">
+          <button class="icon-btn" id="lobbyLeave" aria-label="Leave">←</button>
+          <h2>Room</h2>
+          <span></span>
+        </div>
+        <div class="room-code" id="roomCode">------</div>
+        <div class="invite-row">
+          <button class="btn cream" id="copyInvite">Copy invite link</button>
+          <button class="btn cream" id="shareInvite">Share</button>
+        </div>
+        <ol class="seat-list" id="seatList"></ol>
+        <div class="host-controls" id="hostControls">
+          <div class="setting">
+            <span>Rounds</span>
+            <div class="stepper"><button data-step="rounds" data-d="-1">−</button><b id="roundsVal">5</b><button data-step="rounds" data-d="1">+</button></div>
+          </div>
+          <div class="setting">
+            <span>Decks</span>
+            <div class="seg" id="deckSeg"><button data-decks="1">1 deck</button><button data-decks="2">2 decks</button></div>
+          </div>
+          <button class="btn cream" id="addBot">+ Add bot</button>
+        </div>
+        <p class="lobby-wait" id="lobbyWait">Waiting for the host to start…</p>
+        <button class="btn primary big" id="startGame">Start game</button>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section id="table" class="screen felt hidden">
+      <header class="topbar">
+        <img class="top-logo" src="./assets/boyo-logo.png" alt="BOYO" />
+        <div class="top-info">
+          <span class="pill" id="roundPill">Round 1/5</span>
+          <span class="pill ghost" id="codePill"></span>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" data-sound aria-label="Toggle sound">♪</button>
+          <button class="icon-btn" id="tableRules" aria-label="How to play">?</button>
+          <button class="icon-btn" id="tableLeave" aria-label="Leave">✕</button>
+        </div>
+      </header>
+      <div class="ring" aria-hidden="true"></div>
+      <div id="opponents"></div>
+      <div class="center">
+        <div class="pile">
+          <div id="deck" class="card back md slot-target"></div>
+          <span class="pile-label" id="deckLabel">Deck</span>
+        </div>
+        <div class="pile">
+          <div id="discard" class="slot-target"></div>
+          <span class="pile-label">Discard</span>
+        </div>
+        <div class="drawn hidden" id="drawnBox">
+          <div id="drawnCard"></div>
+          <span class="pile-label">You drew</span>
+        </div>
+      </div>
+      <div id="banner" class="banner hidden"></div>
+      <div class="feed" id="feed"></div>
+      <div class="me">
+        <div class="me-plate" id="myPlate"></div>
+        <div class="hand" id="myHand"></div>
+        <p class="hint" id="hint"></p>
+        <div class="powers hidden" id="powers"></div>
+        <div class="actions">
+          <button class="btn blue act" id="actDraw">DRAW</button>
+          <button class="btn cream act hidden" id="actReturnDrawn">DISCARD DRAWN</button>
+          <button class="btn primary act" id="actTap">TAP</button>
+          <button class="btn red act" id="actBoyo">BOYO</button>
+          <button class="btn cream act hidden" id="actEndTurn">END TURN</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overlays -->
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card" id="modalCard"></div>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <template id="rulesTpl">
+    <div class="rules">
+      <h2>How to Play BOYO</h2>
+      <p class="lead">Finish each round with the <b>lowest total</b>. Scores add up over all rounds — lowest cumulative score wins.</p>
+      <h3>Setup</h3>
+      <ul>
+        <li>2–8 players, using 1 or 2 standard decks (Jokers included). The host chooses the number of rounds and decks.</li>
+        <li>Everyone gets <b>4 face-down cards</b>. At the start you may look at <b>2 of your own cards</b> — then they are hidden again. Remember them!</li>
+      </ul>
+      <h3>Card values</h3>
+      <div class="values">
+        <div><span class="mini red">K♥</span><b>−2</b><small>Red King</small></div>
+        <div><span class="mini">★</span><b>−1</b><small>Joker</small></div>
+        <div><span class="mini">A</span><b>1</b><small>Ace</small></div>
+        <div><span class="mini">2–10</span><b>2–10</b><small>Face value</small></div>
+        <div><span class="mini">J Q</span><b>10</b><small>Jack, Queen</small></div>
+        <div><span class="mini">K♠</span><b>10</b><small>Black King</small></div>
+      </div>
+      <h3>On your turn</h3>
+      <ul>
+        <li><b>Take the discard:</b> swap the top discard with one of your cards. Your old card goes face-up on the discard pile.</li>
+        <li><b>Draw:</b> draw an unseen card from the deck (only you see it) and swap it with one of your cards. If you don't want it, you may discard it face-up on top of the discard pile instead; this skips its powers. Then choose whether to call BOYO or end your turn.</li>
+        <li><b>After a swap:</b> it is still your turn. Choose <b>CALL BOYO</b> to start the final turns, or <b>END TURN</b> to pass to the next player.</li>
+        <li><b>Call BOYO:</b> you may also call it before drawing. BOYO can only be called on your own turn, and only once per round.</li>
+      </ul>
+      <h3>Powers (only when drawn from the deck)</h3>
+      <ul>
+        <li><b>7</b> — look at one of your own cards.</li>
+        <li><b>9</b> — look at another player's card.</li>
+        <li><b>10</b> — swap one of your cards with another player's card, without looking.</li>
+        <li><b>Black King</b> — all three powers.</li>
+      </ul>
+      <h3>TAP — any time, even on other players' turns</h3>
+      <ul>
+        <li>Discard one of your cards whose <b>rank matches the top discard</b> (suits don't matter).</li>
+        <li>Right: the card leaves your hand. Wrong: it stays, and you take <b>one unseen penalty card</b>.</li>
+      </ul>
+      <h3>BOYO!</h3>
+      <ul>
+        <li>After someone calls BOYO, <b>every other player gets exactly one final turn</b>. Then all cards are revealed and scored.</li>
+      </ul>
+      <button class="btn primary big" data-close>Got it</button>
+    </div>
+  </template>
+
+  <script src="./config.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
